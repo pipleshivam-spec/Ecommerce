@@ -35,7 +35,7 @@ const Index = () => {
 
       {/* Features Bar */}
       <section className="bg-card border-y border-border/50">
-        <div className="container-main py-8 grid grid-cols-2 sm:grid-cols-4 gap-6">
+        <div className="container-main py-6 sm:py-8 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           {[
             { icon: Truck, title: "Free Shipping", desc: "On orders over ₹200" },
             { icon: Shield, title: "Quality Guarantee", desc: "Premium materials" },
@@ -43,13 +43,13 @@ const Index = () => {
             { icon: Headphones, title: "24/7 Support", desc: "Always here for you" },
           ].map((f, i) => (
             <ScrollReveal key={f.title} delay={i * 0.1}>
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-primary/10">
-                  <f.icon className="text-primary" size={22} />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <f.icon className="text-primary" size={18} />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground text-sm">{f.title}</h4>
-                  <p className="text-xs text-muted-foreground">{f.desc}</p>
+                  <h4 className="font-semibold text-foreground text-xs sm:text-sm">{f.title}</h4>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{f.desc}</p>
                 </div>
               </div>
             </ScrollReveal>
@@ -63,18 +63,18 @@ const Index = () => {
           <ScrollReveal>
             <div className="text-center mb-12">
               <p className="text-primary text-xs font-medium tracking-[0.4em] uppercase mb-3">Browse</p>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold">Shop by Category</h2>
+              <h2 className="font-display text-2xl sm:text-4xl font-bold">Shop by Category</h2>
             </div>
           </ScrollReveal>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {categoryCards.map((cat, i) => (
               <ScrollReveal key={cat.name} delay={i * 0.08}>
                 <Link to={`/products?category=${cat.name}`} className="group relative aspect-[3/4] overflow-hidden rounded-xl block">
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <h3 className="font-display text-lg font-bold text-foreground">{cat.name}</h3>
-                    <p className="text-xs text-muted-foreground">{cat.count} Products</p>
+                  <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5">
+                    <h3 className="font-display text-sm sm:text-lg font-bold text-foreground">{cat.name}</h3>
+                    <p className="text-xs text-muted-foreground hidden sm:block">{cat.count} Products</p>
                     <span className="text-primary text-xs font-medium flex items-center gap-1 mt-2 group-hover:gap-2 transition-all">
                       Explore <ArrowRight size={12} />
                     </span>
@@ -93,7 +93,7 @@ const Index = () => {
             <div className="flex items-end justify-between mb-12">
               <div>
                 <p className="text-primary text-xs font-medium tracking-[0.4em] uppercase mb-3">Curated Selection</p>
-                <h2 className="font-display text-3xl sm:text-4xl font-bold">Featured Products</h2>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold">Featured Products</h2>
               </div>
               <Link to="/products" className="hidden sm:inline-flex items-center gap-2 text-primary font-medium text-sm hover:gap-3 transition-all">
                 View All <ArrowRight size={14} />
@@ -123,7 +123,7 @@ const Index = () => {
           <ScrollReveal>
             <div className="text-center mb-12">
               <p className="text-primary text-xs font-medium tracking-[0.4em] uppercase mb-3">Just Arrived</p>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold">New Arrivals</h2>
+              <h2 className="font-display text-2xl sm:text-4xl font-bold">New Arrivals</h2>
             </div>
           </ScrollReveal>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -142,7 +142,7 @@ const Index = () => {
           <ScrollReveal>
             <div className="text-center mb-12">
               <p className="text-primary text-xs font-medium tracking-[0.4em] uppercase mb-3">Why MAISON</p>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold">Why Choose Us</h2>
+              <h2 className="font-display text-2xl sm:text-4xl font-bold">Why Choose Us</h2>
             </div>
           </ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -153,7 +153,7 @@ const Index = () => {
               { icon: Headphones, title: "24/7 Support", desc: "Our dedicated team is available around the clock to assist you." },
             ].map((item, i) => (
               <ScrollReveal key={item.title} delay={i * 0.1}>
-                <motion.div className="glass-card p-8 text-center" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300 }}>
+                <motion.div className="glass-card p-5 sm:p-8 text-center" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300 }}>
                   <div className="w-14 h-14 rounded-xl gold-gradient flex items-center justify-center mx-auto mb-5">
                     <item.icon size={24} className="text-primary-foreground" />
                   </div>
@@ -176,13 +176,13 @@ const Index = () => {
             </div>
           </ScrollReveal>
           <div className="max-w-3xl mx-auto relative">
-            <motion.div key={testimonialIdx} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="glass-card p-10 text-center">
-              <div className="flex justify-center gap-1 mb-6">
+            <motion.div key={testimonialIdx} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="glass-card p-6 sm:p-10 text-center">
+              <div className="flex justify-center gap-1 mb-4 sm:mb-6">
                 {Array.from({ length: testimonials[testimonialIdx].rating }).map((_, j) => (
-                  <Star key={j} size={18} className="fill-primary text-primary" />
+                  <Star key={j} size={16} className="fill-primary text-primary" />
                 ))}
               </div>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-8 italic">"{testimonials[testimonialIdx].text}"</p>
+              <p className="text-muted-foreground text-sm sm:text-lg leading-relaxed mb-5 sm:mb-8 italic">"{testimonials[testimonialIdx].text}"</p>
               <p className="font-display font-semibold text-foreground text-lg">{testimonials[testimonialIdx].name}</p>
               <p className="text-xs text-muted-foreground mt-1">{testimonials[testimonialIdx].role}</p>
             </motion.div>
@@ -208,7 +208,7 @@ const Index = () => {
             <p className="text-primary text-xs font-medium tracking-[0.4em] uppercase mb-3">Stay Updated</p>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Join Our Newsletter</h2>
             <p className="text-muted-foreground mb-8">Subscribe to get exclusive access to new arrivals, special offers, and style tips.</p>
-            <form onSubmit={(e) => { e.preventDefault(); }} className="flex gap-3 max-w-md mx-auto">
+            <form onSubmit={(e) => { e.preventDefault(); }} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input type="email" placeholder="Your email address" className="flex-1 px-5 py-3 bg-background border border-border rounded-full text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors text-sm" />
               <button type="submit" className="px-8 py-3 rounded-full gold-gradient text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap">
                 Subscribe

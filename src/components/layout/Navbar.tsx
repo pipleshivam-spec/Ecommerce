@@ -106,15 +106,21 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Right */}
-        <div className="flex lg:hidden items-center gap-2">
-          <button onClick={toggleTheme} className="p-2">
-            {theme === "dark" ? <Sun size={20} className="text-muted-foreground" /> : <Moon size={20} className="text-muted-foreground" />}
+        <div className="flex lg:hidden items-center gap-1">
+          <button onClick={() => setSearchOpen(!searchOpen)} className="p-2 rounded-full hover:bg-muted/50 transition-colors">
+            <Search size={20} className="text-foreground" />
           </button>
-          <IconBtn to="/cart" count={cartCount}>
-            <ShoppingBag size={20} className="text-muted-foreground" />
+          <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted/50 transition-colors">
+            {theme === "dark" ? <Sun size={20} className="text-foreground" /> : <Moon size={20} className="text-foreground" />}
+          </button>
+          <IconBtn to="/wishlist" count={wishlistCount}>
+            <Heart size={20} className="text-foreground" />
           </IconBtn>
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-foreground p-2" aria-label="Toggle menu">
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          <IconBtn to="/cart" count={cartCount}>
+            <ShoppingBag size={20} className="text-foreground" />
+          </IconBtn>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-full hover:bg-muted/50 transition-colors" aria-label="Toggle menu">
+            {mobileOpen ? <X size={22} className="text-foreground" /> : <Menu size={22} className="text-foreground" />}
           </button>
         </div>
       </div>

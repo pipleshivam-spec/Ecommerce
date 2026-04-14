@@ -133,18 +133,18 @@ const HeroSection = ({
         )}
 
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-background/95 via-background/70 to-background/30" />
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-10 container-main pt-24 w-full">
+      <div className="relative z-10 container-main pt-20 sm:pt-24 w-full px-5 sm:px-8">
         <div className="max-w-2xl">
           {/* Subtitle with fade animation */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-primary font-medium tracking-[0.4em] uppercase text-xs mb-6"
+            className="text-primary font-medium tracking-[0.2em] sm:tracking-[0.4em] uppercase text-xs mb-3 sm:mb-6"
           >
             New Collection 2026
           </motion.p>
@@ -154,7 +154,7 @@ const HeroSection = ({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6"
+            className="font-display text-3xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] mb-4 sm:mb-6"
           >
             Modern Fashion <br />
             <span className="gold-text">Store</span>
@@ -165,7 +165,7 @@ const HeroSection = ({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-muted-foreground text-lg mb-10 leading-relaxed max-w-lg"
+            className="text-muted-foreground text-sm sm:text-lg mb-6 sm:mb-10 leading-relaxed max-w-lg"
           >
             Premium Quality Products - Discover timeless elegance with our curated collection of premium fashion, crafted for the modern individual.
           </motion.p>

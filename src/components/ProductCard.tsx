@@ -128,7 +128,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           loading="lazy"
         />
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors duration-300" />
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-0 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
           <div className="flex gap-2">
             <button onClick={handleAddToCart}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md gold-gradient text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity">
