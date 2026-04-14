@@ -4,6 +4,7 @@ import Layout from "@/components/layout/Layout";
 import { useCart } from "@/contexts/CartContext";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, X, Gift } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 const Cart = () => {
   const {
@@ -233,7 +234,15 @@ const Cart = () => {
                 </div>
 
                 <button
-                  onClick={() => navigate('/checkout')}
+                  onClick={() => {
+                    const user = localStorage.getItem('user');
+                    if (!user) {
+                      toast.error('Please login to proceed to checkout');
+                      navigate('/login');
+                      return;
+                    }
+                    navigate('/checkout');
+                  }}
                   className="w-full py-4 rounded-full gold-gradient text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
                 >
                   Proceed to Checkout

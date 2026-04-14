@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/contexts/CartContext';
@@ -22,6 +22,16 @@ const Checkout = () => {
   // Welcome offer
   const userRaw = localStorage.getItem('user');
   const userId = userRaw ? String(JSON.parse(userRaw).id) : '';
+
+  // ── Redirect to login if not logged in ──
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      toast.error('Please login to continue checkout');
+      navigate('/login');
+    }
+  }, [navigate]);
+
   const welcomeActive = userId ? hasWelcomeOffer(userId) : false;
   const welcomeDiscount = welcomeActive ? (totalPrice * WELCOME_DISCOUNT) / 100 : 0;
 
