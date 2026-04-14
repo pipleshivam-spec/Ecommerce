@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Package, Clock, CheckCircle, XCircle, Truck, ChevronDown, ChevronUp, Download } from 'lucide-react';
-import { getUserOrders, Order } from '@/hooks/useOrders';
+import { getUserOrders, getAllOrders, Order } from '@/hooks/useOrders';
 
 const downloadInvoice = (order: Order) => {
   const win = window.open('', '_blank');
@@ -207,7 +207,12 @@ const Orders = () => {
     const userRaw = localStorage.getItem('user');
     if (!userRaw) { navigate('/login'); return; }
     const user = JSON.parse(userRaw);
-    setOrders(getUserOrders(String(user.id)));
+    const allOrders = getAllOrders();
+    // Match by user_id OR email to catch all past orders
+    const userOrders = allOrders.filter(o =>
+      String(o.user_id) === String(user.id) || o.user_email === user.email
+    );
+    setOrders(userOrders);
   }, [navigate]);
 
   const getStatusIcon = (status: string) => {

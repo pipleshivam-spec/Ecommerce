@@ -18,7 +18,10 @@ const transporter = nodemailer.createTransport({
 app.post('/api/send-email', async (req, res) => {
   const { order } = req.body;
 
+  console.log('📧 Email request received for:', order?.user_email, '| Order:', order?.order_number);
+
   if (!order) return res.status(400).json({ error: 'Order data missing' });
+  if (!order.user_email) return res.status(400).json({ error: 'User email missing in order' });
 
   const itemsHtml = order.items
     .map((i, idx) => `<tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}">

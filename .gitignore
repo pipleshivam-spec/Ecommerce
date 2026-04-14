@@ -1,26 +1,7 @@
-# Dependencies
 node_modules/
-.pnp
-.pnp.js
-
-# Build output
+server/node_modules/
 dist/
-dist-ssr/
-build/
-
-# Environment files
 .env
-.env.local
-.env.*.local
-
-# Logs
+server/.env
 *.log
-npm-debug.log*
-
-# Editor
-.vscode/
-.idea/
-
-# OS
 .DS_Store
-Thumbs.db

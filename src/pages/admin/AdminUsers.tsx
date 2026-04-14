@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Shield, User, Search, Mail, Phone, Calendar, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -79,12 +79,16 @@ const AdminUsers = () => {
   const [overrides, setOverrides] = useState<Record<string, Partial<UserData>>>(loadOverrides);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [tick, setTick] = useState(0);
 
-  // Always rebuild fresh from sources, apply overrides on top
+  // Re-read localStorage on every render tick
   const users: UserData[] = useMemo(() => {
     const base = buildUsers();
     return base.map(u => ({ ...u, ...(overrides[u.id] || {}) }));
-  }, [overrides]);
+  }, [overrides, tick]);
+
+  // Force refresh on mount to catch any new registrations
+  useEffect(() => { setTick(t => t + 1); }, []);
 
   const filtered = useMemo(() =>
     users.filter(u => {
