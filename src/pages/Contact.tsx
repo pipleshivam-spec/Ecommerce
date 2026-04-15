@@ -52,9 +52,9 @@ const Contact = () => {
             </p>
             <div className="space-y-6">
               {[
-                { icon: Mail, label: "Email", value: "info@maison.com" },
+                { icon: Mail, label: "Email", value: "maisonwebsite04@gmail.com" },
                 { icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
-                { icon: MapPin, label: "Address", value: "123 Fashion Ave, New York, NY 10001" },
+                { icon: MapPin, label: "Address", value: "Vadodara, India" },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4">
                   <div className="p-3 rounded-sm bg-primary/10">
