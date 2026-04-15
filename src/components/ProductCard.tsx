@@ -128,22 +128,22 @@ const ProductCard = ({ product }: { product: Product }) => {
           loading="lazy"
         />
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors duration-300" />
-        <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 translate-y-0 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
-          <div className="flex gap-1.5 sm:gap-2">
+        <div className="absolute bottom-0 left-0 right-0 p-1.5 sm:p-3 translate-y-0 sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
+          <div className="flex gap-1 sm:gap-2">
             <button onClick={handleAddToCart}
-              className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-md gold-gradient text-primary-foreground text-[11px] sm:text-xs font-semibold hover:opacity-90 transition-opacity min-w-0">
-              <ShoppingBag size={13} className="shrink-0" />
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-md gold-gradient text-primary-foreground text-[10px] sm:text-xs font-semibold hover:opacity-90 transition-opacity min-w-0">
+              <ShoppingBag size={11} className="shrink-0" />
               <span className="truncate">Add to Cart</span>
             </button>
             <Link to={`/product/${product.id}`}
-              className="p-2 sm:p-2.5 rounded-md bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors shrink-0">
-              <Eye size={13} />
+              className="p-1.5 sm:p-2.5 rounded-md bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors shrink-0">
+              <Eye size={11} />
             </Link>
             <button onClick={handleWishlist}
-              className={`p-2 sm:p-2.5 rounded-md backdrop-blur-sm transition-colors shrink-0 ${
+              className={`p-1.5 sm:p-2.5 rounded-md backdrop-blur-sm transition-colors shrink-0 ${
                 wishlisted ? "bg-destructive/20 text-destructive" : "bg-background/80 text-foreground hover:bg-background"
               }`}>
-              <Heart size={13} fill={wishlisted ? "currentColor" : "none"} />
+              <Heart size={11} fill={wishlisted ? "currentColor" : "none"} />
             </button>
           </div>
         </div>
