@@ -52,7 +52,7 @@ const ThemeSelector = () => {
 
       {/* Panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 z-50 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/60">
             <div className="flex items-center gap-2">

@@ -113,6 +113,7 @@ const Navbar = () => {
           <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted/50 transition-colors">
             {theme === "dark" ? <Sun size={20} className="text-foreground" /> : <Moon size={20} className="text-foreground" />}
           </button>
+          <ThemeSelector />
           <IconBtn to="/wishlist" count={wishlistCount}>
             <Heart size={20} className="text-foreground" />
           </IconBtn>
