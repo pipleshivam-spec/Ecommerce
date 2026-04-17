@@ -61,7 +61,8 @@ const Checkout = () => {
 
     try {
       const order = createOrder(items, address, paymentMethod);
-      await sendOrderConfirmationEmail(order);
+      // Fire email in background — don't await it
+      sendOrderConfirmationEmail(order).catch(() => {});
       // Consume welcome offer after first purchase
       if (welcomeActive && userId) consumeWelcomeOffer(userId);
       sessionStorage.removeItem('welcome_offer_active');

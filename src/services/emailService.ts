@@ -8,7 +8,11 @@ const API_URL = import.meta.env.DEV
 export const sendOrderConfirmationEmail = async (order: Order): Promise<void> => {
   if (!order.user_email) return;
 
-  try {
+  const timeout = new Promise<void>((_, reject) =>
+    setTimeout(() => reject(new Error('timeout')), 5000)
+  );
+
+  const send = async () => {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -16,10 +20,13 @@ export const sendOrderConfirmationEmail = async (order: Order): Promise<void> =>
     });
     const text = await res.text();
     const data = text ? JSON.parse(text) : {};
-    if (!res.ok) throw new Error(data.error || 'Failed to send email');
-    toast.success(`Order confirmation sent to ${order.user_email}`);
+    if (res.ok) toast.success(`Order confirmation sent to ${order.user_email}`);
+  };
+
+  try {
+    await Promise.race([send(), timeout]);
   } catch (err: any) {
     console.error('Email error:', err);
-    // Don't block checkout flow for email failures
+    // Silent fail — don't block checkout
   }
 };
