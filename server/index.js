@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const cors = require('cors');
 
 const app = express();
@@ -11,19 +11,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  family: 4,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.post('/api/send-email', async (req, res) => {
   const { order } = req.body;
@@ -165,12 +153,13 @@ app.post('/api/send-email', async (req, res) => {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"Ecommerce Store" <${process.env.GMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'Ecommerce Store <onboarding@resend.dev>',
       to: order.user_email,
       subject: `Order Confirmed – ${order.order_number}`,
       html,
     });
+    console.log('✅ Email sent to:', order.user_email);
     res.json({ success: true });
   } catch (err) {
     console.error('Email send error:', err);
