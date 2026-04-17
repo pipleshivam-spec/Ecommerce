@@ -4,7 +4,10 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://ecommerce.onrender.com', 'http://localhost:8080', /\.onrender\.com$/, /\.railway\.app$/],
+  methods: ['POST'],
+}));
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
