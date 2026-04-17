@@ -5,9 +5,11 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors({
-  origin: ['https://ecommerce.onrender.com', 'http://localhost:8080', /\.onrender\.com$/, /\.railway\.app$/],
-  methods: ['POST'],
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
 }));
+app.options('*', cors());
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
