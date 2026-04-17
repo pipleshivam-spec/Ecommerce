@@ -174,7 +174,7 @@ app.post('/api/send-email', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Email send error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
