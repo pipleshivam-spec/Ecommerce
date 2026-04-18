@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { sendOrderConfirmationEmail } = require('../services/emailService');
 
 class CheckoutController {
   // Process checkout and create order
@@ -173,6 +174,27 @@ class CheckoutController {
       await client.query('DELETE FROM cart_items WHERE cart_id = $1', [cartId]);
 
       await client.query('COMMIT');
+
+      // Fetch full order details for email
+      const fullOrderResult = await pool.query(`
+        SELECT o.*, u.name as user_name, u.email as user_email
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        WHERE o.id = $1
+      `, [order.id]);
+
+      const fullOrder = fullOrderResult.rows[0];
+
+      const itemsForEmail = await pool.query(
+        'SELECT * FROM order_items WHERE order_id = $1',
+        [order.id]
+      );
+      fullOrder.items = itemsForEmail.rows;
+      fullOrder.payment_method = payment_method || 'online';
+
+      // Send confirmation email (non-blocking)
+      sendOrderConfirmationEmail(fullOrder.user_email, fullOrder.user_name, fullOrder)
+        .catch(err => console.error('Email send failed:', err));
 
       res.status(201).json({
         success: true,

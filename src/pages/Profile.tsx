@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { User, Package, Heart, Settings, LogOut, ShoppingBag, TrendingUp } from 'lucide-react';
-import { getUserOrders, Order } from '@/hooks/useOrders';
+import { getAllOrders, Order } from '@/hooks/useOrders';
 
 interface UserProfile {
   id: string | number;
@@ -24,7 +24,10 @@ const Profile = () => {
     if (!userRaw) { navigate('/login'); return; }
     const u = JSON.parse(userRaw);
     setUser(u);
-    setOrders(getUserOrders(String(u.id)));
+    const uid = String(u.id);
+    const all = getAllOrders();
+    const userOrders = all.filter(o => String(o.user_id) === uid || o.user_email === u.email);
+    setOrders(userOrders);
   }, [navigate]);
 
   const handleLogout = () => {

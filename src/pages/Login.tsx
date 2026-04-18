@@ -5,42 +5,6 @@ import { LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { setWelcomeOffer } from "@/lib/offersStore";
 
-const USERS_KEY = "maison_auth_users";
-
-interface StoredUser {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  role: "admin" | "customer";
-  is_active: boolean;
-  created_at: string;
-}
-
-const getUsers = (): StoredUser[] => {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); } catch { return []; }
-};
-
-// Seed default admin always
-const ensureAdmin = () => {
-  const users = getUsers();
-  if (!users.find(u => u.email === "admin@maison.com")) {
-    users.unshift({
-      id: "admin_1",
-      name: "Admin",
-      email: "admin@maison.com",
-      password: "admin123",
-      phone: "+91 98765 43210",
-      role: "admin",
-      is_active: true,
-      created_at: new Date(Date.now() - 90 * 86400000).toISOString(),
-    });
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
-};
-ensureAdmin();
-
 const Login = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -62,13 +26,9 @@ const Login = () => {
     if (!validate()) return;
     setLoading(true);
 
-    await new Promise(r => setTimeout(r, 500));
-
-    const users = getUsers();
-    const user = users.find(
-      u => u.email.toLowerCase() === form.email.toLowerCase().trim() &&
-           u.password === form.password
-    );
+    const users: { id: string; name: string; email: string; password: string; phone?: string; role: string; created_at: string; is_active: boolean }[] =
+      JSON.parse(localStorage.getItem("maison_users") || "[]");
+    const user = users.find(u => u.email === form.email.toLowerCase().trim() && u.password === form.password);
 
     if (!user) {
       toast.error("Invalid email or password");
@@ -76,38 +36,20 @@ const Login = () => {
       return;
     }
 
-    if (!user.is_active) {
-      toast.error("Your account has been deactivated");
-      setLoading(false);
-      return;
-    }
-
-    // Save session
-    const token = `token_${user.id}_${Date.now()}`;
+    const token = `local_token_${user.id}`;
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      created_at: user.created_at,
-    }));
+    localStorage.setItem("user", JSON.stringify(user));
 
-    // Activate welcome offer — match pending UID set during registration
     const pendingUid = localStorage.getItem("pending_welcome_uid");
-    if (pendingUid && pendingUid === user.id) {
-      setWelcomeOffer(user.id);
+    if (pendingUid && pendingUid === String(user.id)) {
+      try { setWelcomeOffer(String(user.id)); } catch {}
       localStorage.removeItem("pending_welcome_uid");
     }
 
     toast.success(`Welcome back, ${user.name}!`);
     setLoading(false);
-
-    // Dispatch storage event so ProductCard picks up user + welcome offer immediately
     window.dispatchEvent(new StorageEvent("storage", { key: "user" }));
     window.dispatchEvent(new StorageEvent("storage", { key: "maison_welcome_offer" }));
-
     if (user.role === "admin") navigate("/admin");
     else navigate("/");
   };

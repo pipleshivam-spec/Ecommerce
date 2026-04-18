@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Shield, User, Search, Mail, Phone, Calendar, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { getAllOrders } from "@/hooks/useOrders";
 
 interface UserData {
   id: string;
@@ -12,120 +11,71 @@ interface UserData {
   role: "admin" | "customer";
   is_active: boolean;
   created_at: string;
-  order_count: number;
-  total_spent: number;
 }
 
-const USERS_KEY = "maison_users";
-const AUTH_KEY  = "maison_auth_users";
-
-const buildUsers = (): UserData[] => {
-  const map = new Map<string, UserData>();
-
-  // 1. Always include admin
-  map.set("admin_1", {
-    id: "admin_1", name: "Admin", email: "admin@maison.com",
-    phone: "+91 98765 43210", role: "admin", is_active: true,
-    created_at: new Date(Date.now() - 90 * 86400000).toISOString(),
-    order_count: 0, total_spent: 0,
-  });
-
-  // 2. Load registered users from auth store
-  try {
-    const authUsers = JSON.parse(localStorage.getItem(AUTH_KEY) || "[]");
-    authUsers.forEach((u: any) => {
-      if (u.role === "admin") return; // skip admin duplicate
-      map.set(u.id, {
-        id: u.id, name: u.name, email: u.email,
-        phone: u.phone || "—", role: u.role || "customer",
-        is_active: u.is_active !== false,
-        created_at: u.created_at || new Date().toISOString(),
-        order_count: 0, total_spent: 0,
-      });
-    });
-  } catch {}
-
-  // 3. Merge order data
-  getAllOrders().forEach(o => {
-    if (!map.has(o.user_id)) {
-      map.set(o.user_id, {
-        id: o.user_id, name: o.user_name, email: o.user_email,
-        phone: o.shipping_phone || "—", role: "customer",
-        is_active: true, created_at: o.created_at,
-        order_count: 0, total_spent: 0,
-      });
-    }
-    const u = map.get(o.user_id)!;
-    u.order_count += 1;
-    u.total_spent += o.total_amount;
-  });
-
-  return Array.from(map.values());
-};
-
-const saveOverrides = (data: UserData[]) =>
-  localStorage.setItem(USERS_KEY, JSON.stringify(data));
-
-const loadOverrides = (): Record<string, Partial<UserData>> => {
-  try {
-    const saved: UserData[] = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-    const map: Record<string, Partial<UserData>> = {};
-    saved.forEach(u => { map[u.id] = { is_active: u.is_active }; });
-    return map;
-  } catch { return {}; }
-};
-
 const AdminUsers = () => {
-  const [overrides, setOverrides] = useState<Record<string, Partial<UserData>>>(loadOverrides);
+  const [users, setUsers] = useState<UserData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
-  const [tick, setTick] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Re-read localStorage on every render tick
-  const users: UserData[] = useMemo(() => {
-    const base = buildUsers();
-    return base.map(u => ({ ...u, ...(overrides[u.id] || {}) }));
-  }, [overrides, tick]);
+  const fetchUsers = useCallback(() => {
+    const authUsers: UserData[] = JSON.parse(localStorage.getItem('maison_users') || '[]');
+    const orders = JSON.parse(localStorage.getItem('ecom_orders') || '[]');
 
-  // Force refresh on mount to catch any new registrations
-  useEffect(() => { setTick(t => t + 1); }, []);
+    // Always include admin
+    const adminExists = authUsers.find(u => u.email === 'admin@maison.com');
+    if (!adminExists) {
+      authUsers.unshift({
+        id: 'admin_1', name: 'Admin', email: 'admin@maison.com',
+        phone: '+91 98765 43210', role: 'admin', is_active: true,
+        created_at: new Date(Date.now() - 90 * 86400000).toISOString(),
+      });
+    }
 
-  const filtered = useMemo(() =>
-    users.filter(u => {
-      const q = searchTerm.toLowerCase();
-      return (
-        (u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
-        (filterRole === "all" || u.role === filterRole)
-      );
-    }), [users, searchTerm, filterRole]);
+    // Add order counts
+    const usersWithStats = authUsers.map(u => {
+      const userOrders = orders.filter((o: any) => o.user_id === u.id || o.user_email === u.email);
+      return { ...u, order_count: userOrders.length, total_spent: userOrders.reduce((s: number, o: any) => s + o.total_amount, 0) };
+    });
+
+    setUsers(usersWithStats);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const filtered = users.filter(u => {
+    const q = searchTerm.toLowerCase();
+    return (
+      (u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
+      (filterRole === "all" || u.role === filterRole)
+    );
+  });
 
   const stats = {
     total: users.length,
     customers: users.filter(u => u.role === "customer").length,
     admins: users.filter(u => u.role === "admin").length,
-    active: users.filter(u => u.is_active).length,
+    active: users.filter(u => u.is_active !== false).length,
+  };
+
+  const toggleStatus = (id: string, current: boolean) => {
+    const authUsers = JSON.parse(localStorage.getItem('maison_users') || '[]');
+    const updated = authUsers.map((u: any) => u.id === id ? { ...u, is_active: !current } : u);
+    localStorage.setItem('maison_users', JSON.stringify(updated));
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, is_active: !current } : u));
+    toast.success(`User ${!current ? 'activated' : 'deactivated'}`);
   };
 
   const deleteUser = (id: string) => {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
-    const updated = users.filter(u => u.id !== id);
-    try {
-      const auth = JSON.parse(localStorage.getItem("maison_auth_users") || "[]");
-      localStorage.setItem("maison_auth_users", JSON.stringify(auth.filter((u: any) => u.id !== id)));
-    } catch {}
-    saveOverrides(updated);
-    setOverrides(prev => { const n = { ...prev }; delete n[id]; return n; });
-    toast.success("User deleted");
-  };
-
-  const toggleStatus = (id: string) => {
-    const user = users.find(u => u.id === id);
-    if (!user) return;
-    const newActive = !user.is_active;
-    const newOverrides = { ...overrides, [id]: { is_active: newActive } };
-    setOverrides(newOverrides);
-    saveOverrides(users.map(u => u.id === id ? { ...u, is_active: newActive } : u));
-    toast.success(`User ${newActive ? "activated" : "deactivated"}`);
+    if (!confirm('Delete this user? This cannot be undone.')) return;
+    const authUsers = JSON.parse(localStorage.getItem('maison_users') || '[]');
+    localStorage.setItem('maison_users', JSON.stringify(authUsers.filter((u: any) => u.id !== id)));
+    setUsers(prev => prev.filter(u => u.id !== id));
+    toast.success('User deleted');
   };
 
   return (
@@ -166,14 +116,16 @@ const AdminUsers = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50 bg-secondary/30">
-                  {["User", "Contact", "Role", "Orders", "Spent", "Joined", "Status", "Actions"].map(h => (
+                  {["User", "Contact", "Role", "Joined", "Status", "Actions"].map(h => (
                     <th key={h} className={`px-6 py-4 text-muted-foreground font-medium text-xs uppercase tracking-wider ${h === "Actions" ? "text-right" : "text-left"}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">No users found</td></tr>
+                {loading ? (
+                  <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">Loading users...</td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">No users found</td></tr>
                 ) : filtered.map(u => (
                   <tr key={u.id} className="border-b border-border/30 hover:bg-secondary/20 transition-colors">
                     <td className="px-6 py-4">
@@ -195,7 +147,7 @@ const AdminUsers = () => {
                           <Mail className="h-3 w-3 shrink-0" />
                           <span className="text-xs truncate max-w-[150px]">{u.email}</span>
                         </div>
-                        {u.phone && u.phone !== "—" && (
+                        {u.phone && (
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Phone className="h-3 w-3 shrink-0" />
                             <span className="text-xs">{u.phone}</span>
@@ -211,10 +163,6 @@ const AdminUsers = () => {
                         {u.role.toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center font-semibold">{u.order_count}</td>
-                    <td className="px-6 py-4 font-semibold text-primary">
-                      {u.total_spent > 0 ? `₹${u.total_spent.toFixed(0)}` : "—"}
-                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Calendar className="h-3 w-3" />
@@ -223,22 +171,22 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        u.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                        u.is_active !== false ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                       }`}>
-                        {u.is_active ? "Active" : "Inactive"}
+                        {u.is_active !== false ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => toggleStatus(u.id)}
+                        <button onClick={() => toggleStatus(String(u.id), u.is_active !== false)}
                           className="p-2 text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-primary/10"
-                          title={u.is_active ? "Deactivate" : "Activate"}>
-                          {u.is_active
+                          title={u.is_active !== false ? "Deactivate" : "Activate"}>
+                          {u.is_active !== false
                             ? <ToggleRight className="h-5 w-5 text-green-600" />
                             : <ToggleLeft className="h-5 w-5 text-red-600" />}
                         </button>
                         {u.role !== "admin" && (
-                          <button onClick={() => deleteUser(u.id)}
+                          <button onClick={() => deleteUser(String(u.id))}
                             className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg hover:bg-destructive/10"
                             title="Delete user">
                             <Trash2 className="h-4 w-4" />

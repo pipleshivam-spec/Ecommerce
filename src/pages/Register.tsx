@@ -5,23 +5,6 @@ import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { setWelcomeOffer } from "@/lib/offersStore";
 
-const USERS_KEY = "maison_auth_users";
-
-interface StoredUser {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  role: "admin" | "customer";
-  is_active: boolean;
-  created_at: string;
-}
-
-const getUsers = (): StoredUser[] => {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); } catch { return []; }
-};
-
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
@@ -40,58 +23,41 @@ const Register = () => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (ev: React.FormEvent) => {
+  const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
     setLoading(true);
 
-    await new Promise(r => setTimeout(r, 500));
+    const saveUserLocally = (user: { id: string; name: string; email: string; password: string; phone?: string; role: string; created_at: string; is_active: boolean }) => {
+      const existing: typeof user[] = JSON.parse(localStorage.getItem("maison_users") || "[]");
+      const deduped = existing.filter(u => u.email !== user.email);
+      localStorage.setItem("maison_users", JSON.stringify([...deduped, user]));
+    };
 
-    const users = getUsers();
-
-    // Check duplicate email
-    if (users.find(u => u.email.toLowerCase() === form.email.toLowerCase())) {
-      toast.error("An account with this email already exists");
+    const existing: { email: string }[] = JSON.parse(localStorage.getItem("maison_users") || "[]");
+    if (existing.some(u => u.email === form.email.toLowerCase().trim())) {
+      toast.error("Email already registered.");
       setLoading(false);
       return;
     }
 
-    // Create new user
-    const newUser: StoredUser = {
-      id: `user_${Date.now()}`,
+    const newUser = {
+      id: `local_${Date.now()}`,
       name: form.name.trim(),
       email: form.email.toLowerCase().trim(),
       password: form.password,
       phone: form.phone.trim(),
-      role: "customer",
+      role: "customer" as const,
       is_active: true,
       created_at: new Date().toISOString(),
     };
-
-    // Save to localStorage
-    localStorage.setItem(USERS_KEY, JSON.stringify([...users, newUser]));
-
-    // Also save to maison_users so AdminUsers sees it immediately
-    const adminUsersRaw = localStorage.getItem("maison_users");
-    const adminUsers = adminUsersRaw ? JSON.parse(adminUsersRaw) : [];
-    adminUsers.push({
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      phone: newUser.phone,
-      role: "customer",
-      is_active: true,
-      created_at: newUser.created_at,
-      order_count: 0,
-      total_spent: 0,
-    });
-    localStorage.setItem("maison_users", JSON.stringify(adminUsers));
-
-    // Set welcome offer immediately using the new user's ID
-    setWelcomeOffer(newUser.id);
-    // Store ID so Login can pick it up
-    localStorage.setItem("pending_welcome_uid", newUser.id);
-
+    saveUserLocally(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
+    localStorage.setItem("token", `local_token_${newUser.id}`);
+    try {
+      setWelcomeOffer(newUser.id);
+      localStorage.setItem("pending_welcome_uid", newUser.id);
+    } catch {}
     toast.success("Account created! Please login.");
     setLoading(false);
     navigate("/login");

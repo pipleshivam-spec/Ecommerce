@@ -28,7 +28,7 @@ const toAdmin = (p: typeof localProducts[0]): AdminProduct => ({
   category: p.category,
   description: p.description,
   image: p.image,
-  stock: Math.floor(Math.random() * 90) + 10,
+  stock: 50,
   sku: `SKU-${String(p.id).padStart(4, "0")}`,
   is_active: true,
   badge: p.badge,
@@ -41,15 +41,23 @@ const STORAGE_KEY = "admin_products";
 const load = (): AdminProduct[] => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
+    const savedMap = new Map<number, AdminProduct>();
     if (saved) {
       const parsed: AdminProduct[] = JSON.parse(saved);
-      // Sync prices from source if they differ
-      const synced = parsed.map(p => {
-        const source = localProducts.find(s => s.id === p.id);
-        return source ? { ...p, price: source.price, originalPrice: source.originalPrice } : p;
-      });
-      return synced;
+      parsed.forEach(p => savedMap.set(p.id, p));
     }
+    // Always start from source products so none are ever missing
+    const merged = localProducts.map(p => {
+      const existing = savedMap.get(p.id);
+      return existing
+        ? { ...existing, price: p.price, originalPrice: p.originalPrice, image: existing.image || p.image }
+        : toAdmin(p);
+    });
+    // Append any admin-created products (id not in localProducts)
+    const localIds = new Set(localProducts.map(p => p.id));
+    savedMap.forEach((p, id) => { if (!localIds.has(id)) merged.push(p); });
+    save(merged);
+    return merged;
   } catch {}
   return localProducts.map(toAdmin);
 };

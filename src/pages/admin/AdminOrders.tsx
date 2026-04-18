@@ -3,6 +3,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Search, Package, Calendar, TrendingUp, ShoppingBag, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
 import { getAllOrders, updateOrderStatus, Order } from "@/hooks/useOrders";
+import { sendOrderStatusEmail } from "@/services/emailService";
 
 type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year';
 
@@ -32,7 +33,7 @@ const AdminOrders = () => {
   const [orders, setOrders]           = useState<Order[]>([]);
   const [searchTerm, setSearchTerm]   = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [dateFilter, setDateFilter]   = useState<DateFilter>('today');
+  const [dateFilter, setDateFilter]   = useState<DateFilter>('all');
 
   const loadOrders = () => setOrders(getAllOrders());
   useEffect(() => { loadOrders(); }, []);
@@ -41,6 +42,8 @@ const AdminOrders = () => {
     updateOrderStatus(orderId, newStatus);
     loadOrders();
     toast.success('Order status updated');
+    const order = orders.find(o => o.id === orderId);
+    if (order) sendOrderStatusEmail({ ...order, status: newStatus });
   };
 
   const dateFiltered = useMemo(() => filterByDate(orders, dateFilter), [orders, dateFilter]);

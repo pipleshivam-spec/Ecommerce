@@ -54,19 +54,20 @@ const Checkout = () => {
     setStep(2);
   };
 
+  const [appliedWelcomeDiscount, setAppliedWelcomeDiscount] = useState(0);
+
   const handlePayment = async () => {
     setLoading(true);
-    // Simulate payment processing delay
     await new Promise(r => setTimeout(r, 2000));
 
     try {
       const order = createOrder(items, address, paymentMethod);
-      // Fire email in background — don't await it
       sendOrderConfirmationEmail(order).catch(() => {});
-      // Consume welcome offer after first purchase
+      const savedDiscount = welcomeActive ? welcomeDiscount : 0;
       if (welcomeActive && userId) consumeWelcomeOffer(userId);
       sessionStorage.removeItem('welcome_offer_active');
       clearCart();
+      setAppliedWelcomeDiscount(savedDiscount);
       setPlacedOrder(order);
       setShowCelebration(true);
       setStep(3);
@@ -117,12 +118,12 @@ const Checkout = () => {
                   Your order has been confirmed and will be delivered soon.
                 </p>
 
-                {/* Welcome discount badge */}
-                {showCelebration && (
+                {/* Welcome discount badge — only show if discount was actually applied */}
+                {appliedWelcomeDiscount > 0 && (
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6 border"
                     style={{ background: 'linear-gradient(135deg, #7c3aed10, #4f46e510)', borderColor: '#7c3aed30', color: '#7c3aed' }}>
                     <Gift size={14} />
-                    Welcome {WELCOME_DISCOUNT}% discount was applied — you saved ₹{welcomeDiscount.toFixed(0)}!
+                    Welcome {WELCOME_DISCOUNT}% discount was applied — you saved ₹{appliedWelcomeDiscount.toFixed(0)}!
                   </div>
                 )}
 
