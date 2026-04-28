@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import OfferBanner from "@/components/OfferBanner";
@@ -9,6 +9,11 @@ import { useLocation } from "react-router-dom";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <OfferBanner />
@@ -17,10 +22,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <motion.main
           key={pathname}
           className="flex-1"
-          initial={{ opacity: 0, y: -60, clipPath: "inset(0 0 100% 0)" }}
-          animate={{ opacity: 1, y: 0,  clipPath: "inset(0 0 0% 0)" }}
-          exit={{    opacity: 0, y: 20, clipPath: "inset(0 0 100% 0)" }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
           {children}
         </motion.main>
