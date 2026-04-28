@@ -22,38 +22,35 @@ const AdminLogin = () => {
     if (!validate()) return;
     setLoading(true);
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email.trim(), password: form.password }),
-      });
+    // Check hardcoded admin first
+    const ADMIN_EMAIL = 'admin@maison.com';
+    const ADMIN_PASSWORD = 'Admin@123';
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        toast.error(data.message || "Invalid credentials");
-        setLoading(false);
-        return;
-      }
-
-      const user = data.data.user;
-
-      if (user.role !== "admin") {
-        toast.error("Access denied. Admin only.");
-        setLoading(false);
-        return;
-      }
-
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      toast.success("Welcome, Admin!");
-      navigate("/admin");
-    } catch {
-      toast.error("Cannot connect to server. Make sure backend is running.");
+    if (form.email.trim() === ADMIN_EMAIL && form.password === ADMIN_PASSWORD) {
+      const adminUser = { id: 'admin_1', name: 'Admin', email: ADMIN_EMAIL, role: 'admin' };
+      localStorage.setItem('token', 'admin_token');
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      toast.success('Welcome, Admin!');
       setLoading(false);
+      navigate('/admin');
+      return;
     }
+
+    // Check localStorage users with admin role
+    const users = JSON.parse(localStorage.getItem('maison_users') || '[]');
+    const user = users.find((u: any) => u.email === form.email.trim() && u.password === form.password && u.role === 'admin');
+
+    if (!user) {
+      toast.error('Invalid credentials or not an admin.');
+      setLoading(false);
+      return;
+    }
+
+    localStorage.setItem('token', `admin_token_${user.id}`);
+    localStorage.setItem('user', JSON.stringify(user));
+    toast.success('Welcome, Admin!');
+    setLoading(false);
+    navigate('/admin');
   };
 
   const inputClass = (field: string) =>
@@ -88,7 +85,7 @@ const AdminLogin = () => {
           </button>
         </form>
         <p className="text-center text-xs text-muted-foreground/60 mt-6">
-          Default: admin@ecommerce.com / Admin@123
+          Default: admin@maison.com / Admin@123
         </p>
       </div>
     </div>

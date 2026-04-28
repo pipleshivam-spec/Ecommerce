@@ -26,6 +26,20 @@ const Login = () => {
     if (!validate()) return;
     setLoading(true);
 
+    const ADMIN_EMAIL = 'admin@maison.com';
+    const ADMIN_PASSWORD = 'Admin@123';
+
+    if (form.email.toLowerCase().trim() === ADMIN_EMAIL && form.password === ADMIN_PASSWORD) {
+      const adminUser = { id: 'admin_1', name: 'Admin', email: ADMIN_EMAIL, role: 'admin' };
+      localStorage.setItem('token', 'admin_token');
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      toast.success('Welcome, Admin!');
+      setLoading(false);
+      window.dispatchEvent(new StorageEvent('storage', { key: 'user' }));
+      navigate('/admin');
+      return;
+    }
+
     const users: { id: string; name: string; email: string; password: string; phone?: string; role: string; created_at: string; is_active: boolean }[] =
       JSON.parse(localStorage.getItem("maison_users") || "[]");
     const user = users.find(u => u.email === form.email.toLowerCase().trim() && u.password === form.password);
